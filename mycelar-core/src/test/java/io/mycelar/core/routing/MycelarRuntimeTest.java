@@ -124,4 +124,11 @@ class MycelarRuntimeTest {
                                         .route("crm", RoutingContext.empty()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void graphReturnsSameInstance() {
+        MycelarGraph graph = MycelarGraph.builder().build();
+        MycelarRuntime runtime = MycelarRuntime.builder().graph(graph).build();
+        assertThat(runtime.graph()).isSameAs(graph);
+    }
 }

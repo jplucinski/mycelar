@@ -1,5 +1,7 @@
 package io.mycelar.core.graph;
 
+import io.mycelar.core.capability.CapabilityDescriptor;
+import io.mycelar.core.capability.CapabilityId;
 import io.mycelar.core.validation.GraphValidationException;
 import io.mycelar.core.validation.GraphValidator;
 import io.mycelar.core.validation.Violation;
@@ -26,6 +28,7 @@ public final class MycelarGraph {
     private final Map<EdgeId, GraphEdge> edges;
     private final Map<NodeId, List<GraphEdge>> outgoing;
     private final List<NodeId> walkRoots;
+    private final Map<CapabilityId, CapabilityDescriptor> capabilitiesById;
 
     private MycelarGraph(List<GraphNode> nodeList, List<GraphEdge> edgeList) {
         VALIDATOR.validate(nodeList, edgeList);
@@ -52,6 +55,11 @@ public final class MycelarGraph {
         this.edges = Collections.unmodifiableMap(edgeMap);
         this.outgoing = Collections.unmodifiableMap(frozenOut);
         this.walkRoots = List.copyOf(computeWalkRoots(nodeMap.keySet(), edgeList));
+        Map<CapabilityId, CapabilityDescriptor> capIndex = new LinkedHashMap<>();
+        for (GraphNode n : nodeMap.values()) {
+            n.capability().ifPresent(d -> capIndex.put(d.id(), d));
+        }
+        this.capabilitiesById = Collections.unmodifiableMap(capIndex);
     }
 
     public static Builder builder() {
@@ -60,6 +68,11 @@ public final class MycelarGraph {
 
     public Optional<GraphNode> node(NodeId id) {
         return Optional.ofNullable(nodes.get(id));
+    }
+
+    public Optional<CapabilityDescriptor> capability(CapabilityId id) {
+        Objects.requireNonNull(id, "id");
+        return Optional.ofNullable(capabilitiesById.get(id));
     }
 
     public Collection<GraphNode> nodes() {

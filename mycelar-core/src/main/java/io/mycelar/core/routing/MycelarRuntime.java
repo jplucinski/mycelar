@@ -43,6 +43,10 @@ public final class MycelarRuntime {
         return new Builder();
     }
 
+    public MycelarGraph graph() {
+        return graph;
+    }
+
     public RouteResult route(RouteRequest request) {
         Objects.requireNonNull(request, "request");
 

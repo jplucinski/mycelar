@@ -2,6 +2,9 @@ package io.mycelar.core.graph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.mycelar.core.capability.CapabilityDescriptor;
+import io.mycelar.core.capability.CapabilityId;
+import io.mycelar.core.capability.GatewayId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,5 +82,53 @@ class MycelarGraphTest {
                 MycelarGraph.builder().node(crm).node(leads).edge(e).build()
                         .withWeights(Map.of(new EdgeId("e1"), 0.9));
         assertThat(graph.outgoing(new NodeId("crm")).get(0).weight()).isEqualTo(0.9);
+    }
+
+    @Test
+    void capabilityReturnsDescriptorById() {
+        CapabilityDescriptor descriptor =
+                new CapabilityDescriptor(
+                        new CapabilityId("read"),
+                        "read",
+                        "read a lead",
+                        new GatewayId("crm"),
+                        "readLead",
+                        Map.of());
+        GraphNode node =
+                new GraphNode(
+                        new NodeId("read"),
+                        NodeType.CAPABILITY,
+                        new NodeMetadata("read", "read", List.of(), List.of(), Map.of()),
+                        List.of(),
+                        Optional.of(descriptor),
+                        Optional.empty());
+        MycelarGraph graph = MycelarGraph.builder().node(node).build();
+
+        assertThat(graph.capability(new CapabilityId("read"))).contains(descriptor);
+        assertThat(graph.capability(new CapabilityId("missing"))).isEmpty();
+    }
+
+    @Test
+    void capabilityIndexSurvivesWithWeights() {
+        CapabilityDescriptor descriptor =
+                new CapabilityDescriptor(
+                        new CapabilityId("read"),
+                        "read",
+                        "read a lead",
+                        new GatewayId("crm"),
+                        "readLead",
+                        Map.of());
+        GraphNode node =
+                new GraphNode(
+                        new NodeId("read"),
+                        NodeType.CAPABILITY,
+                        new NodeMetadata("read", "read", List.of(), List.of(), Map.of()),
+                        List.of(),
+                        Optional.of(descriptor),
+                        Optional.empty());
+        MycelarGraph graph = MycelarGraph.builder().node(node).build();
+
+        assertThat(graph.withWeights(Map.of()).capability(new CapabilityId("read")))
+                .contains(descriptor);
     }
 }

@@ -2,22 +2,26 @@ plugins {
     java
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+group = "io.mycelar"
+version = "0.1.0-SNAPSHOT"
+
+subprojects {
+    apply(plugin = "java")
+
+    group = "io.mycelar"
+    version = "0.1.0-SNAPSHOT"
+
+    extensions.configure<JavaPluginExtension>("java") {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
     }
-}
 
-repositories {
-    mavenCentral()
-}
+    repositories {
+        mavenCentral()
+    }
 
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
-    testImplementation("org.assertj:assertj-core:3.27.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-tasks.test {
-    useJUnitPlatform()
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 }

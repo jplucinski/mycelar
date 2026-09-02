@@ -1,1 +1,3 @@
-rootProject.name = "mycelar-core"
+rootProject.name = "mycelar"
+
+include("mycelar-core")

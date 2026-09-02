@@ -3,6 +3,7 @@ package io.mycelar.springai.advisor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.mycelar.core.graph.GraphNode;
 import io.mycelar.core.routing.MycelarRuntime;
 import io.mycelar.core.routing.SemanticMatcher;
 import io.mycelar.springai.autoconfigure.MycelarSpringAiProperties;
@@ -41,13 +42,31 @@ class MycelarAdvisorTest {
         MycelarRuntime runtime = runtime();
         MycelarSpringAiProperties badTopK = new MycelarSpringAiProperties();
         badTopK.setTopK(0);
-        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badTopK))
+        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badTopK, null))
                 .isInstanceOf(MycelarConfigurationException.class);
 
         MycelarSpringAiProperties badOrder = new MycelarSpringAiProperties();
         badOrder.setAdvisorOrder(ToolCallingAdvisor.DEFAULT_ORDER);
-        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badOrder))
+        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badOrder, null))
                 .isInstanceOf(MycelarConfigurationException.class);
+    }
+
+    @Test
+    void clearsQueryCacheAfterRoute() {
+        TrackingMatcher tracking = new TrackingMatcher();
+        MycelarRuntime runtime =
+                MycelarRuntime.builder()
+                        .graph(LeadGraphFixture.graph())
+                        .semanticMatcher(tracking)
+                        .build();
+        ChatClientRequest request =
+                ChatClientRequest.builder()
+                        .prompt(new Prompt(List.of(new UserMessage("Update this lead"))))
+                        .build();
+        CapturingCallAdvisorChain chain = new CapturingCallAdvisorChain();
+        advisor(runtime, registry(runtime), new MycelarSpringAiProperties(), tracking)
+                .adviseCall(request, chain);
+        assertThat(tracking.clears.get()).isEqualTo(1);
     }
 
     @Test
@@ -72,7 +91,7 @@ class MycelarAdvisorTest {
                                                 new UserMessage("   "))))
                         .build();
         CapturingCallAdvisorChain chain = new CapturingCallAdvisorChain();
-        advisor(runtime, registry(runtime), new MycelarSpringAiProperties()).adviseCall(request, chain);
+        advisor(runtime, registry(runtime), new MycelarSpringAiProperties(), null).adviseCall(request, chain);
 
         assertThat(similarities.get()).isZero();
         Prompt prompt = chain.request.prompt();
@@ -89,7 +108,7 @@ class MycelarAdvisorTest {
         ToolCallback unmanaged = StubTools.callback("unmanaged");
 
         ChatClient.builder(model)
-                .defaultAdvisors(advisor(runtime, registry(runtime), new MycelarSpringAiProperties()))
+                .defaultAdvisors(advisor(runtime, registry(runtime), new MycelarSpringAiProperties(), null))
                 .build()
                 .prompt()
                 .system("app system")
@@ -125,7 +144,10 @@ class MycelarAdvisorTest {
     }
 
     private static MycelarAdvisor advisor(
-            MycelarRuntime runtime, CapabilityToolRegistry registry, MycelarSpringAiProperties properties) {
+            MycelarRuntime runtime,
+            CapabilityToolRegistry registry,
+            MycelarSpringAiProperties properties,
+            SemanticMatcher semanticMatcher) {
         return new MycelarAdvisor(
                 runtime,
                 new MycelarRequestMapper(),
@@ -135,7 +157,8 @@ class MycelarAdvisorTest {
                 registry,
                 new MycelarCapabilityAuthorizer(),
                 new MycelarSessionResolver(),
-                properties);
+                properties,
+                semanticMatcher);
     }
 
     private static final class CapturingCallAdvisorChain implements CallAdvisorChain {
@@ -170,6 +193,20 @@ class MycelarAdvisorTest {
                                     .map(cb -> cb.getToolDefinition().name())
                                     .toList();
             return new PromptTools(names);
+        }
+    }
+
+    private static final class TrackingMatcher implements SemanticMatcher {
+        private final AtomicInteger clears = new AtomicInteger();
+
+        @Override
+        public double similarity(String intent, GraphNode node) {
+            return 0.5;
+        }
+
+        @Override
+        public void clearQueryCache() {
+            clears.incrementAndGet();
         }
     }
 }

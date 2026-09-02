@@ -108,9 +108,17 @@ class MycelarAutoConfiguration {
             CapabilityToolRegistry registry,
             MycelarCapabilityAuthorizer authorizer,
             MycelarSessionResolver sessionResolver,
-            MycelarSpringAiProperties properties) {
+            MycelarSpringAiProperties properties,
+            ObjectProvider<SemanticMatcher> semanticMatcher) {
         return new MycelarAdvisor(
-                runtime, requestMapper, renderer, registry, authorizer, sessionResolver, properties);
+                runtime,
+                requestMapper,
+                renderer,
+                registry,
+                authorizer,
+                sessionResolver,
+                properties,
+                semanticMatcher.getIfAvailable());
     }
 
     @Bean

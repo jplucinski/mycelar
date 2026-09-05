@@ -70,7 +70,6 @@ class CrmRoutingTest {
 
     @Test
     void heavierEqualLexiconPathWins() {
-        // implemented on fixture extra edges: see CrmGraphFixture.weightedForkGraph()
         MycelarRuntime r =
                 MycelarRuntime.builder().graph(CrmGraphFixture.weightedForkGraph()).build();
         RouteResult result = r.route("follow-up", RoutingContext.empty());

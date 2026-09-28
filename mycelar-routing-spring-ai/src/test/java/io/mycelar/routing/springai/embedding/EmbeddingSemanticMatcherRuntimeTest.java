@@ -42,6 +42,6 @@ class EmbeddingSemanticMatcherRuntimeTest {
         assertThat(result.primary().orElseThrow().path().nodeIds())
                 .last()
                 .isEqualTo(new NodeId("draft-email"));
-        assertThat(result.primary().orElseThrow().score().components()).containsKey("semantic");
+        assertThat(result.primary().orElseThrow().score().componentMap()).containsKey("semantic");
     }
 }

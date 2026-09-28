@@ -14,7 +14,7 @@ final class ConfirmEvaluator implements ConstraintEvaluator {
 
     @Override
     public ConstraintDecision evaluate(Constraint constraint, RoutingContext context) {
-        return Boolean.TRUE.equals(context.get("confirmed"))
+        return context.get("confirmed").filter(Boolean.TRUE::equals).isPresent()
                 ? ConstraintDecision.ALLOW
                 : ConstraintDecision.REQUIRE_CONFIRMATION;
     }

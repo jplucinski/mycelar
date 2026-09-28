@@ -171,8 +171,8 @@ class CapabilityResolverTest {
                 NodeType.DOMAIN,
                 new NodeMetadata(id, "", List.of(), List.of(), Map.of()),
                 List.of(),
-                Optional.empty(),
-                Optional.empty());
+                null,
+                null);
     }
 
     private static GraphNode capability(String id, String name, String operationId) {
@@ -181,15 +181,14 @@ class CapabilityResolverTest {
                 NodeType.CAPABILITY,
                 new NodeMetadata(name, "", List.of(), List.of(), Map.of()),
                 List.of(),
-                Optional.of(
-                        new CapabilityDescriptor(
-                                new CapabilityId(id),
-                                name,
-                                "",
-                                new GatewayId("crm-mcp"),
-                                operationId,
-                                Map.of())),
-                Optional.empty());
+                new CapabilityDescriptor(
+                        new CapabilityId(id),
+                        name,
+                        "",
+                        new GatewayId("crm-mcp"),
+                        operationId,
+                        Map.of()),
+                null);
     }
 
     private static GraphNode constraint(String id, String type, String description) {
@@ -198,8 +197,8 @@ class CapabilityResolverTest {
                 NodeType.CONSTRAINT,
                 new NodeMetadata(id, "", List.of(), List.of(), Map.of()),
                 List.of(),
-                Optional.empty(),
-                Optional.of(new Constraint(new ConstraintId(id), type, description, Map.of())));
+                null,
+                new Constraint(new ConstraintId(id), type, description, Map.of()));
     }
 
     private static GraphEdge contains(String edgeId, String source, String target) {
@@ -243,7 +242,7 @@ final class ConfirmEvaluator implements ConstraintEvaluator {
 
     @Override
     public ConstraintDecision evaluate(Constraint c, RoutingContext ctx) {
-        return Boolean.TRUE.equals(ctx.get("confirmed"))
+        return ctx.get("confirmed").filter(Boolean.TRUE::equals).isPresent()
                 ? ConstraintDecision.ALLOW
                 : ConstraintDecision.REQUIRE_CONFIRMATION;
     }

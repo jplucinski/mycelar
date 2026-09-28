@@ -26,24 +26,24 @@ class DefaultRouteScorerTest {
                         NodeType.DOMAIN,
                         new NodeMetadata("follow-up", "follow-up", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         GraphNode a =
                 new GraphNode(
                         new NodeId("a"),
                         NodeType.CONTEXT,
                         new NodeMetadata("follow-up", "follow-up", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         GraphNode b =
                 new GraphNode(
                         new NodeId("b"),
                         NodeType.CONTEXT,
                         new NodeMetadata("follow-up", "follow-up", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         MycelarGraph graph =
                 MycelarGraph.builder()
                         .node(root)
@@ -61,7 +61,7 @@ class DefaultRouteScorerTest {
         RouteScore sa = scorer.score(req, new RoutePath(List.of(new NodeId("root"), new NodeId("a")), List.of(new EdgeId("ra"))), graph);
         RouteScore sb = scorer.score(req, new RoutePath(List.of(new NodeId("root"), new NodeId("b")), List.of(new EdgeId("rb"))), graph);
         assertThat(sa.total()).isGreaterThan(sb.total());
-        assertThat(sa.components().keySet())
+        assertThat(sa.componentMap().keySet())
                 .containsExactlyInAnyOrder("semantic", "topology", "runtimeContext", "pathPenalty");
     }
 }

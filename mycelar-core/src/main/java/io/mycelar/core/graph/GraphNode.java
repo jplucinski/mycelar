@@ -12,16 +12,22 @@ public record GraphNode(
         NodeType type,
         NodeMetadata metadata,
         List<ContextCapsule> capsules,
-        Optional<CapabilityDescriptor> capability,
-        Optional<Constraint> constraint) {
+        CapabilityDescriptor capabilityDescriptor,
+        Constraint constraintDescriptor) {
 
     public GraphNode {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(type, "type");
         Objects.requireNonNull(metadata, "metadata");
         Objects.requireNonNull(capsules, "capsules");
-        Objects.requireNonNull(capability, "capability");
-        Objects.requireNonNull(constraint, "constraint");
         capsules = List.copyOf(capsules);
+    }
+
+    public Optional<CapabilityDescriptor> capability() {
+        return Optional.ofNullable(capabilityDescriptor);
+    }
+
+    public Optional<Constraint> constraint() {
+        return Optional.ofNullable(constraintDescriptor);
     }
 }

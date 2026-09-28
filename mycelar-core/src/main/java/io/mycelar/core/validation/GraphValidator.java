@@ -141,22 +141,26 @@ public final class GraphValidator {
             return;
         }
         EdgeType type = edge.type();
-        if (type == EdgeType.CONTAINS || type == EdgeType.RELATES_TO) {
-            if (source.type() == NodeType.CONSTRAINT || target.type() == NodeType.CONSTRAINT) {
-                violations.add(
-                        new Violation(
-                                path, type + " must not involve CONSTRAINT endpoints"));
+        switch (type) {
+            case CONTAINS, RELATES_TO -> {
+                if (source.type() == NodeType.CONSTRAINT || target.type() == NodeType.CONSTRAINT) {
+                    violations.add(
+                            new Violation(
+                                    path, type + " must not involve CONSTRAINT endpoints"));
+                }
             }
-        } else if (type == EdgeType.REQUIRES) {
-            if (source.type() != NodeType.CAPABILITY) {
-                violations.add(new Violation(path, "REQUIRES source must be CAPABILITY"));
+            case REQUIRES -> {
+                if (source.type() != NodeType.CAPABILITY) {
+                    violations.add(new Violation(path, "REQUIRES source must be CAPABILITY"));
+                }
+                if (target.type() != NodeType.CONSTRAINT) {
+                    violations.add(new Violation(path, "REQUIRES target must be CONSTRAINT"));
+                }
             }
-            if (target.type() != NodeType.CONSTRAINT) {
-                violations.add(new Violation(path, "REQUIRES target must be CONSTRAINT"));
-            }
-        } else if (type == EdgeType.EXPANDS_TO) {
-            if (source.type() == NodeType.CONSTRAINT) {
-                violations.add(new Violation(path, "EXPANDS_TO source must not be CONSTRAINT"));
+            case EXPANDS_TO -> {
+                if (source.type() == NodeType.CONSTRAINT) {
+                    violations.add(new Violation(path, "EXPANDS_TO source must not be CONSTRAINT"));
+                }
             }
         }
     }

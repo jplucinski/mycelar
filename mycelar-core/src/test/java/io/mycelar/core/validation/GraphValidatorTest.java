@@ -25,8 +25,8 @@ class GraphValidatorTest {
                 NodeType.DOMAIN,
                 new NodeMetadata(id, "", List.of(), List.of(), Map.of()),
                 List.of(),
-                Optional.empty(),
-                Optional.empty());
+                null,
+                null);
     }
 
     @Test
@@ -44,15 +44,14 @@ class GraphValidatorTest {
                         NodeType.CAPABILITY,
                         new NodeMetadata("send", "", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.of(
-                                new io.mycelar.core.capability.CapabilityDescriptor(
-                                        new io.mycelar.core.capability.CapabilityId("send"),
-                                        "send",
-                                        "",
-                                        new io.mycelar.core.capability.GatewayId("crm-mcp"),
-                                        "send_message",
-                                        Map.of())),
-                        Optional.empty());
+                        new io.mycelar.core.capability.CapabilityDescriptor(
+                                new io.mycelar.core.capability.CapabilityId("send"),
+                                "send",
+                                "",
+                                new io.mycelar.core.capability.GatewayId("crm-mcp"),
+                                "send_message",
+                                Map.of()),
+                        null);
         GraphNode leads = domain("leads");
         GraphEdge requires =
                 new GraphEdge(
@@ -75,13 +74,12 @@ class GraphValidatorTest {
                         NodeType.CONSTRAINT,
                         new NodeMetadata("confirm", "", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.of(
-                                new io.mycelar.core.constraint.Constraint(
-                                        new io.mycelar.core.constraint.ConstraintId("confirm"),
-                                        "confirm-before-send",
-                                        "need confirm",
-                                        Map.of())));
+                        null,
+                        new io.mycelar.core.constraint.Constraint(
+                                new io.mycelar.core.constraint.ConstraintId("confirm"),
+                                "confirm-before-send",
+                                "need confirm",
+                                Map.of()));
         GraphEdge contains =
                 new GraphEdge(
                         new EdgeId("e1"),

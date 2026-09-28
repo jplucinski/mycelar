@@ -49,15 +49,15 @@ class GraphRecordsTest {
                         "stay local",
                         10,
                         1.0,
-                        Optional.empty());
+                        null);
         GraphNode node =
                 new GraphNode(
                         new NodeId("crm"),
                         NodeType.DOMAIN,
                         new NodeMetadata("CRM", "", List.of(), List.of(), Map.of()),
                         List.of(capsule),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         assertThat(node.capsules()).containsExactly(capsule);
     }
 }

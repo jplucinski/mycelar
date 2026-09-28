@@ -24,8 +24,8 @@ class CandidatePathFinderTest {
                 NodeType.CONTEXT,
                 new NodeMetadata(id, "", List.of(), List.of(), Map.of()),
                 List.of(),
-                Optional.empty(),
-                Optional.empty());
+                null,
+                null);
     }
 
     private GraphEdge relates(String id, String s, String t, double w) {

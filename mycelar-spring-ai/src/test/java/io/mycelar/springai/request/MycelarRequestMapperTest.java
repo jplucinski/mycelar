@@ -29,8 +29,8 @@ class MycelarRequestMapperTest {
 
         assertThat(mapped.intent()).isEqualTo("Update this lead");
         assertThat(mapped.topK()).isEqualTo(1);
-        assertThat(mapped.context().get("confirmed")).isEqualTo(true);
-        assertThat(mapped.context().get("chat_memory_conversation_id")).isNull();
-        assertThat(mapped.context().get("other")).isNull();
+        assertThat(mapped.context().get("confirmed")).contains(true);
+        assertThat(mapped.context().get("chat_memory_conversation_id")).isEmpty();
+        assertThat(mapped.context().get("other")).isEmpty();
     }
 }

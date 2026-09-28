@@ -1,6 +1,6 @@
 package io.mycelar.springai.exception;
 
-public class MycelarConfigurationException extends RuntimeException {
+public final class MycelarConfigurationException extends RuntimeException {
     public MycelarConfigurationException(String message) {
         super(message);
     }

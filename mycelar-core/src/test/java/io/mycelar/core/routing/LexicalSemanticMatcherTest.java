@@ -21,8 +21,8 @@ class LexicalSemanticMatcherTest {
                         NodeType.CAPABILITY,
                         new NodeMetadata("Search leads", "find inactive leads", List.of("lookup"), List.of("crm"), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         double sim = new LexicalSemanticMatcher().similarity("search inactive leads", node);
         assertThat(sim).isGreaterThan(0.0);
         assertThat(sim).isLessThanOrEqualTo(1.0);
@@ -36,8 +36,8 @@ class LexicalSemanticMatcherTest {
                         NodeType.DOMAIN,
                         new NodeMetadata("CRM", "", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         assertThat(new LexicalSemanticMatcher().similarity("", node)).isZero();
     }
 }

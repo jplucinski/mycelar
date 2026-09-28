@@ -1,16 +1,15 @@
 package io.mycelar.core.routing;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class RoutingContext {
 
     private final Map<String, Object> values;
 
     private RoutingContext(Map<String, Object> values) {
-        this.values = Collections.unmodifiableMap(new HashMap<>(values));
+        this.values = Map.copyOf(values);
     }
 
     public static RoutingContext empty() {
@@ -24,9 +23,9 @@ public final class RoutingContext {
         return new RoutingContext(values);
     }
 
-    public Object get(String key) {
+    public Optional<Object> get(String key) {
         Objects.requireNonNull(key, "key");
-        return values.get(key);
+        return Optional.ofNullable(values.get(key));
     }
 
     public Map<String, Object> asMap() {

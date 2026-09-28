@@ -18,6 +18,7 @@ import java.util.Objects;
 public final class MycelarRuntime {
 
     private final MycelarGraph graph;
+    private final SemanticMatcher semanticMatcher;
     private final RouteScorer routeScorer;
     private final RoutingLimits routingLimits;
     private final List<ConstraintEvaluator> constraintEvaluators;
@@ -27,10 +28,12 @@ public final class MycelarRuntime {
 
     private MycelarRuntime(
             MycelarGraph graph,
+            SemanticMatcher semanticMatcher,
             RouteScorer routeScorer,
             RoutingLimits routingLimits,
             List<ConstraintEvaluator> constraintEvaluators) {
         this.graph = graph;
+        this.semanticMatcher = semanticMatcher;
         this.routeScorer = routeScorer;
         this.routingLimits = routingLimits;
         this.constraintEvaluators = constraintEvaluators;
@@ -49,38 +52,41 @@ public final class MycelarRuntime {
 
     public RouteResult route(RouteRequest request) {
         Objects.requireNonNull(request, "request");
-
-        List<RoutePath> paths = pathFinder.find(graph, routingLimits);
-        if (paths.isEmpty()) {
-            return new RouteResult(List.of());
-        }
-
-        List<ScoredPath> scored = new ArrayList<>(paths.size());
-        for (RoutePath path : paths) {
-            RouteScore score = routeScorer.score(request, path, graph);
-            if (!Double.isFinite(score.total())) {
-                throw new IllegalArgumentException("route score total must be finite");
+        try {
+            List<RoutePath> paths = pathFinder.find(graph, routingLimits);
+            if (paths.isEmpty()) {
+                return new RouteResult(List.of());
             }
-            scored.add(new ScoredPath(path, score));
-        }
 
-        scored.sort(
-                Comparator.comparingDouble((ScoredPath s) -> s.score.total())
-                        .reversed()
-                        .thenComparing(s -> s.path.nodeIds(), NODE_IDS_LEX));
+            List<ScoredPath> scored = new ArrayList<>(paths.size());
+            for (RoutePath path : paths) {
+                RouteScore score = routeScorer.score(request, path, graph);
+                if (!Double.isFinite(score.total())) {
+                    throw new IllegalArgumentException("route score total must be finite");
+                }
+                scored.add(new ScoredPath(path, score));
+            }
 
-        int limit = Math.min(request.topK(), scored.size());
-        List<RouteCandidate> candidates = new ArrayList<>(limit);
-        for (int i = 0; i < limit; i++) {
-            ScoredPath sp = scored.get(i);
-            ContextStack stack = contextAssembler.assemble(graph, sp.path);
-            CapabilityScope scope =
-                    capabilityResolver.resolve(
-                            graph, sp.path, request.context(), constraintEvaluators);
-            List<ExpansionCandidate> expansions = collectExpansions(sp.path);
-            candidates.add(new RouteCandidate(sp.path, sp.score, stack, scope, expansions));
+            scored.sort(
+                    Comparator.comparingDouble((ScoredPath s) -> s.score.total())
+                            .reversed()
+                            .thenComparing(s -> s.path.nodeIds(), NODE_IDS_LEX));
+
+            int limit = Math.min(request.topK(), scored.size());
+            List<RouteCandidate> candidates = new ArrayList<>(limit);
+            for (int i = 0; i < limit; i++) {
+                ScoredPath sp = scored.get(i);
+                ContextStack stack = contextAssembler.assemble(graph, sp.path);
+                CapabilityScope scope =
+                        capabilityResolver.resolve(
+                                graph, sp.path, request.context(), constraintEvaluators);
+                List<ExpansionCandidate> expansions = collectExpansions(sp.path);
+                candidates.add(new RouteCandidate(sp.path, sp.score, stack, scope, expansions));
+            }
+            return new RouteResult(List.copyOf(candidates));
+        } finally {
+            semanticMatcher.clearQueryCache();
         }
-        return new RouteResult(List.copyOf(candidates));
     }
 
     public RouteResult route(String intent, RoutingContext context) {
@@ -164,7 +170,7 @@ public final class MycelarRuntime {
                             ? List.of()
                             : List.copyOf(constraintEvaluators);
 
-            return new MycelarRuntime(graph, scorer, limits, evaluators);
+            return new MycelarRuntime(graph, matcher, scorer, limits, evaluators);
         }
     }
 }

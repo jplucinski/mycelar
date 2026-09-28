@@ -42,12 +42,12 @@ class MycelarAdvisorTest {
         MycelarRuntime runtime = runtime();
         MycelarSpringAiProperties badTopK = new MycelarSpringAiProperties();
         badTopK.setTopK(0);
-        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badTopK, null))
+        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badTopK))
                 .isInstanceOf(MycelarConfigurationException.class);
 
         MycelarSpringAiProperties badOrder = new MycelarSpringAiProperties();
         badOrder.setAdvisorOrder(ToolCallingAdvisor.DEFAULT_ORDER);
-        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badOrder, null))
+        assertThatThrownBy(() -> advisor(runtime, registry(runtime), badOrder))
                 .isInstanceOf(MycelarConfigurationException.class);
     }
 
@@ -64,8 +64,7 @@ class MycelarAdvisorTest {
                         .prompt(new Prompt(List.of(new UserMessage("Update this lead"))))
                         .build();
         CapturingCallAdvisorChain chain = new CapturingCallAdvisorChain();
-        advisor(runtime, registry(runtime), new MycelarSpringAiProperties(), tracking)
-                .adviseCall(request, chain);
+        advisor(runtime, registry(runtime), new MycelarSpringAiProperties()).adviseCall(request, chain);
         assertThat(tracking.clears.get()).isEqualTo(1);
     }
 
@@ -91,7 +90,7 @@ class MycelarAdvisorTest {
                                                 new UserMessage("   "))))
                         .build();
         CapturingCallAdvisorChain chain = new CapturingCallAdvisorChain();
-        advisor(runtime, registry(runtime), new MycelarSpringAiProperties(), null).adviseCall(request, chain);
+        advisor(runtime, registry(runtime), new MycelarSpringAiProperties()).adviseCall(request, chain);
 
         assertThat(similarities.get()).isZero();
         Prompt prompt = chain.request.prompt();
@@ -108,7 +107,7 @@ class MycelarAdvisorTest {
         ToolCallback unmanaged = StubTools.callback("unmanaged");
 
         ChatClient.builder(model)
-                .defaultAdvisors(advisor(runtime, registry(runtime), new MycelarSpringAiProperties(), null))
+                .defaultAdvisors(advisor(runtime, registry(runtime), new MycelarSpringAiProperties()))
                 .build()
                 .prompt()
                 .system("app system")
@@ -146,8 +145,7 @@ class MycelarAdvisorTest {
     private static MycelarAdvisor advisor(
             MycelarRuntime runtime,
             CapabilityToolRegistry registry,
-            MycelarSpringAiProperties properties,
-            SemanticMatcher semanticMatcher) {
+            MycelarSpringAiProperties properties) {
         return new MycelarAdvisor(
                 runtime,
                 new MycelarRequestMapper(),
@@ -157,8 +155,7 @@ class MycelarAdvisorTest {
                 registry,
                 new MycelarCapabilityAuthorizer(),
                 new MycelarSessionResolver(),
-                properties,
-                semanticMatcher);
+                properties);
     }
 
     private static final class CapturingCallAdvisorChain implements CallAdvisorChain {

@@ -34,7 +34,7 @@ class MycelarContextRendererTest {
                         "first capsule",
                         1,
                         1.0,
-                        Optional.empty());
+                        null);
         ContextCapsule second =
                 new ContextCapsule(
                         new CapsuleId("c2"),
@@ -42,13 +42,13 @@ class MycelarContextRendererTest {
                         "second capsule",
                         2,
                         1.0,
-                        Optional.empty());
+                        null);
         RouteCandidate candidate =
                 new RouteCandidate(
                         new RoutePath(
                                 List.of(new NodeId("leads"), new NodeId("update")),
                                 List.of(new EdgeId("leads-update"))),
-                        new RouteScore(1.0, Map.of()),
+                        new RouteScore(1.0, new RouteScore.ScoreComponents(0.5, 0.5, 0.5, 0.0)),
                         new ContextStack(
                                 List.of(
                                         new ResolvedCapsule(first, new NodeId("leads"), 0),
@@ -92,7 +92,7 @@ class MycelarContextRendererTest {
         RouteCandidate candidate =
                 new RouteCandidate(
                         new RoutePath(List.of(new NodeId("leads")), List.of()),
-                        new RouteScore(1.0, Map.of()),
+                        new RouteScore(1.0, new RouteScore.ScoreComponents(0.5, 0.5, 0.5, 0.0)),
                         new ContextStack(List.of()),
                         new CapabilityScope(Set.of(), Set.of()),
                         List.of());
@@ -108,7 +108,7 @@ class MycelarContextRendererTest {
         RouteCandidate candidate =
                 new RouteCandidate(
                         new RoutePath(List.of(new NodeId("leads")), List.of()),
-                        new RouteScore(1.0, Map.of()),
+                        new RouteScore(1.0, new RouteScore.ScoreComponents(0.5, 0.5, 0.5, 0.0)),
                         new ContextStack(List.of()),
                         new CapabilityScope(
                                 Set.of(new CapabilityId("read")),

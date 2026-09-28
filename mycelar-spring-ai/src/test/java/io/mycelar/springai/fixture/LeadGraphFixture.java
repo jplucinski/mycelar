@@ -44,7 +44,7 @@ public final class LeadGraphFixture {
                         "Current entities are leads.",
                         20,
                         1.0,
-                        Optional.empty()));
+                        null));
     }
 
     private static GraphNode resource(
@@ -54,8 +54,8 @@ public final class LeadGraphFixture {
                 NodeType.RESOURCE,
                 new NodeMetadata(id, description, List.of(), keywords, Map.of()),
                 capsules,
-                Optional.empty(),
-                Optional.empty());
+                null,
+                null);
     }
 
     private static GraphNode capability(String id, String operationId, List<String> keywords) {
@@ -64,15 +64,14 @@ public final class LeadGraphFixture {
                 NodeType.CAPABILITY,
                 new NodeMetadata(id, id, List.of(), keywords, Map.of()),
                 List.of(),
-                Optional.of(
-                        new CapabilityDescriptor(
-                                new CapabilityId(id),
-                                id,
-                                id,
-                                new GatewayId("crm"),
-                                operationId,
-                                Map.of())),
-                Optional.empty());
+                new CapabilityDescriptor(
+                        new CapabilityId(id),
+                        id,
+                        id,
+                        new GatewayId("crm"),
+                        operationId,
+                        Map.of()),
+                null);
     }
 
     private static GraphEdge contains(String edgeId, String source, String target) {

@@ -11,13 +11,12 @@ public record ContextCapsule(
         String text,
         int priority,
         double confidence,
-        Optional<Duration> ttl) {
+        Duration ttlDuration) {
 
     public ContextCapsule {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(type, "type");
         Objects.requireNonNull(text, "text");
-        Objects.requireNonNull(ttl, "ttl");
         if (text.isBlank()) {
             throw new IllegalArgumentException("text must not be blank");
         }
@@ -27,5 +26,9 @@ public record ContextCapsule(
                 || confidence > 1.0) {
             throw new IllegalArgumentException("confidence must be in [0,1]");
         }
+    }
+
+    public Optional<Duration> ttl() {
+        return Optional.ofNullable(ttlDuration);
     }
 }

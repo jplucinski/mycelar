@@ -179,7 +179,7 @@ class CrmRoutingTest {
         assertThat(result.candidates()).isNotEmpty();
         RouteCandidate top = result.candidates().get(0);
         assertThat(top.path().nodeIds()).isNotEmpty();
-        assertThat(top.score().components())
+        assertThat(top.score().componentMap())
                 .containsKeys("semantic", "topology", "runtimeContext", "pathPenalty");
         assertThat(top.contextStack()).isNotNull();
         assertThat(top.expansions()).isNotNull();

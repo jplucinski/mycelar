@@ -18,8 +18,8 @@ class MycelarGraphTest {
                 type,
                 new NodeMetadata(id, "", List.of(), List.of(), Map.of()),
                 List.of(),
-                Optional.empty(),
-                Optional.empty());
+                null,
+                null);
     }
 
     @Test
@@ -100,8 +100,8 @@ class MycelarGraphTest {
                         NodeType.CAPABILITY,
                         new NodeMetadata("read", "read", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.of(descriptor),
-                        Optional.empty());
+                        descriptor,
+                        null);
         MycelarGraph graph = MycelarGraph.builder().node(node).build();
 
         assertThat(graph.capability(new CapabilityId("read"))).contains(descriptor);
@@ -124,8 +124,8 @@ class MycelarGraphTest {
                         NodeType.CAPABILITY,
                         new NodeMetadata("read", "read", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.of(descriptor),
-                        Optional.empty());
+                        descriptor,
+                        null);
         MycelarGraph graph = MycelarGraph.builder().node(node).build();
 
         assertThat(graph.withWeights(Map.of()).capability(new CapabilityId("read")))

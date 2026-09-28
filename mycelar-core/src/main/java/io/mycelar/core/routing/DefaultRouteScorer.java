@@ -6,7 +6,6 @@ import io.mycelar.core.graph.GraphNode;
 import io.mycelar.core.graph.MycelarGraph;
 import io.mycelar.core.graph.NodeId;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -45,12 +44,9 @@ public final class DefaultRouteScorer implements RouteScorer {
                         + weights.context() * runtimeContext
                         - pathPenalty;
 
-        Map<String, Double> components = new LinkedHashMap<>();
-        components.put("semantic", semantic);
-        components.put("topology", topology);
-        components.put("runtimeContext", runtimeContext);
-        components.put("pathPenalty", pathPenalty);
-        return new RouteScore(total, components);
+        return new RouteScore(
+                total,
+                new RouteScore.ScoreComponents(semantic, topology, runtimeContext, pathPenalty));
     }
 
     private double semanticScore(String intent, List<GraphNode> nodes) {

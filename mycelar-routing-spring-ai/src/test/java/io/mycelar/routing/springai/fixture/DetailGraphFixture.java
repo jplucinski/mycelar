@@ -80,8 +80,8 @@ public final class DetailGraphFixture {
                 NodeType.RESOURCE,
                 new NodeMetadata(id, description, List.of(), List.of(), Map.of()),
                 List.of(),
-                Optional.empty(),
-                Optional.empty());
+                null,
+                null);
     }
 
     private static GraphNode capability(String id, String description, List<String> keywords) {
@@ -90,15 +90,14 @@ public final class DetailGraphFixture {
                 NodeType.CAPABILITY,
                 new NodeMetadata(id, description, List.of(), keywords, Map.of()),
                 List.of(),
-                Optional.of(
-                        new CapabilityDescriptor(
-                                new CapabilityId(id),
-                                id,
-                                description,
-                                new GatewayId("crm"),
-                                id,
-                                Map.of())),
-                Optional.empty());
+                new CapabilityDescriptor(
+                        new CapabilityId(id),
+                        id,
+                        description,
+                        new GatewayId("crm"),
+                        id,
+                        Map.of()),
+                null);
     }
 
     private static GraphEdge contains(String edgeId, String source, String target) {

@@ -65,8 +65,7 @@ class MycelarAdvisorIntegrationTest {
                         registry,
                         authorizer,
                         new MycelarSessionResolver(),
-                        properties,
-                        counting);
+                        properties);
 
         RecordingChatModel model =
                 new RecordingChatModel(

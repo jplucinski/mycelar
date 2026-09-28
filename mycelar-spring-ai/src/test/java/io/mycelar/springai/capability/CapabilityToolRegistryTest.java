@@ -185,30 +185,28 @@ class CapabilityToolRegistryTest {
                         NodeType.CAPABILITY,
                         new NodeMetadata("read", "read", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.of(
-                                new CapabilityDescriptor(
-                                        new CapabilityId("read"),
-                                        "read",
-                                        "read",
-                                        new GatewayId("crm"),
-                                        "sharedOp",
-                                        Map.of())),
-                        Optional.empty());
+                        new CapabilityDescriptor(
+                                new CapabilityId("read"),
+                                "read",
+                                "read",
+                                new GatewayId("crm"),
+                                "sharedOp",
+                                Map.of()),
+                        null);
         GraphNode b =
                 new GraphNode(
                         new NodeId("update"),
                         NodeType.CAPABILITY,
                         new NodeMetadata("update", "update", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.of(
-                                new CapabilityDescriptor(
-                                        new CapabilityId("update"),
-                                        "update",
-                                        "update",
-                                        new GatewayId("crm"),
-                                        "sharedOp",
-                                        Map.of())),
-                        Optional.empty());
+                        new CapabilityDescriptor(
+                                new CapabilityId("update"),
+                                "update",
+                                "update",
+                                new GatewayId("crm"),
+                                "sharedOp",
+                                Map.of()),
+                        null);
         MycelarRuntime dupRuntime =
                 MycelarRuntime.builder().graph(MycelarGraph.builder().node(a).node(b).build()).build();
         assertThatThrownBy(

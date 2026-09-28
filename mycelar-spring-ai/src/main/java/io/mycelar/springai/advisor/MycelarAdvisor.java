@@ -5,7 +5,6 @@ import io.mycelar.core.graph.NodeId;
 import io.mycelar.core.routing.MycelarRuntime;
 import io.mycelar.core.routing.RouteCandidate;
 import io.mycelar.core.routing.RouteRequest;
-import io.mycelar.core.routing.SemanticMatcher;
 import io.mycelar.springai.autoconfigure.MycelarSpringAiProperties;
 import io.mycelar.springai.capability.CapabilityToolBinding;
 import io.mycelar.springai.capability.CapabilityToolRegistry;
@@ -51,7 +50,6 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
     private final MycelarCapabilityAuthorizer authorizer;
     private final MycelarSessionResolver sessionResolver;
     private final MycelarSpringAiProperties properties;
-    private final SemanticMatcher semanticMatcher;
 
     public MycelarAdvisor(
             MycelarRuntime runtime,
@@ -60,8 +58,7 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
             CapabilityToolRegistry registry,
             MycelarCapabilityAuthorizer authorizer,
             MycelarSessionResolver sessionResolver,
-            MycelarSpringAiProperties properties,
-            SemanticMatcher semanticMatcher) {
+            MycelarSpringAiProperties properties) {
         this.runtime = Objects.requireNonNull(runtime, "runtime");
         this.requestMapper = Objects.requireNonNull(requestMapper, "requestMapper");
         this.renderer = Objects.requireNonNull(renderer, "renderer");
@@ -69,7 +66,6 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
         this.authorizer = Objects.requireNonNull(authorizer, "authorizer");
         this.sessionResolver = Objects.requireNonNull(sessionResolver, "sessionResolver");
         this.properties = Objects.requireNonNull(properties, "properties");
-        this.semanticMatcher = semanticMatcher;
         if (properties.getTopK() < 1) {
             throw new MycelarConfigurationException("mycelar.spring-ai.top-k must be >= 1");
         }
@@ -111,14 +107,7 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
         }
 
         RouteRequest routeRequest = requestMapper.map(request, properties.getTopK());
-        Optional<RouteCandidate> primary;
-        try {
-            primary = runtime.route(routeRequest).primary();
-        } finally {
-            if (semanticMatcher != null) {
-                semanticMatcher.clearQueryCache();
-            }
-        }
+        Optional<RouteCandidate> primary = runtime.route(routeRequest).primary();
         if (primary.isEmpty()) {
             return builder.prompt(withTools(request.prompt(), List.of(), sessionId, "", Set.of(), List.of()))
                     .build();

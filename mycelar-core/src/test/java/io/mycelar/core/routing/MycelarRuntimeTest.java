@@ -48,16 +48,16 @@ class MycelarRuntimeTest {
                         NodeType.CONTEXT,
                         new NodeMetadata("message", "message", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         GraphNode history =
                 new GraphNode(
                         new NodeId("interaction-history"),
                         NodeType.CONTEXT,
                         new NodeMetadata("history", "", List.of(), List.of(), Map.of()),
                         List.of(),
-                        Optional.empty(),
-                        Optional.empty());
+                        null,
+                        null);
         MycelarGraph graph =
                 MycelarGraph.builder()
                         .node(message)
@@ -89,8 +89,8 @@ class MycelarRuntimeTest {
                                         NodeType.DOMAIN,
                                         new NodeMetadata("crm", "", List.of(), List.of(), Map.of()),
                                         List.of(),
-                                        Optional.empty(),
-                                        Optional.empty()))
+                                        null,
+                                        null))
                         .build();
         assertThatThrownBy(
                         () ->
@@ -111,10 +111,13 @@ class MycelarRuntimeTest {
                                         NodeType.DOMAIN,
                                         new NodeMetadata("crm", "", List.of(), List.of(), Map.of()),
                                         List.of(),
-                                        Optional.empty(),
-                                        Optional.empty()))
+                                        null,
+                                        null))
                         .build();
-        RouteScorer nan = (req, path, g) -> new RouteScore(Double.NaN, Map.of());
+        RouteScorer nan =
+                (req, path, g) ->
+                        new RouteScore(
+                                Double.NaN, new RouteScore.ScoreComponents(0.0, 0.0, 0.0, 0.0));
         assertThatThrownBy(
                         () ->
                                 MycelarRuntime.builder()

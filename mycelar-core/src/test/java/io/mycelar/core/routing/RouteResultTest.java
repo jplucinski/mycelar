@@ -33,7 +33,7 @@ class RouteResultTest {
     private static RouteCandidate candidate(String node) {
         return new RouteCandidate(
                 new RoutePath(List.of(new NodeId(node)), List.of()),
-                new RouteScore(1.0, Map.of()),
+                new RouteScore(1.0, new RouteScore.ScoreComponents(0.5, 0.5, 0.5, 0.0)),
                 new ContextStack(List.of()),
                 new CapabilityScope(Set.of(), Set.of()),
                 List.of());

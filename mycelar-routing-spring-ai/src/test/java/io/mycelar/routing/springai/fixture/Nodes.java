@@ -19,7 +19,7 @@ public final class Nodes {
                 NodeType.RESOURCE,
                 new NodeMetadata(label, description, aliases, keywords, Map.of()),
                 List.of(),
-                Optional.empty(),
-                Optional.empty());
+                null,
+                null);
     }
 }

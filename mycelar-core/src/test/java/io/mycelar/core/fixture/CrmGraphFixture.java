@@ -199,12 +199,12 @@ final class CrmGraphFixture {
                 type,
                 new NodeMetadata(id, description, List.of(), keywords, Map.of()),
                 capsules,
-                capability,
-                constraint);
+                capability.orElse(null),
+                constraint.orElse(null));
     }
 
     private static ContextCapsule capsule(String id, CapsuleType type, String text, int priority) {
-        return new ContextCapsule(new CapsuleId(id), type, text, priority, 1.0, Optional.empty());
+        return new ContextCapsule(new CapsuleId(id), type, text, priority, 1.0, null);
     }
 
     private static GraphEdge contains(String edgeId, String source, String target) {

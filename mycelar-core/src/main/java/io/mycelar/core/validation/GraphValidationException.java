@@ -8,7 +8,10 @@ public final class GraphValidationException extends RuntimeException {
     private final List<Violation> violations;
 
     public GraphValidationException(List<Violation> violations) {
-        super(violations.stream().map(Violation::message).collect(Collectors.joining("; ")));
+        super(
+                violations.stream()
+                        .map(v -> v.path() + ": " + v.message())
+                        .collect(Collectors.joining("; ")));
         this.violations = List.copyOf(violations);
     }
 

@@ -12,6 +12,8 @@ Graph-based context runtime for LLM applications.
 
 `mycelar-spring-ai` and `mycelar-routing-spring-ai` both depend on core, not on each other.
 
+Runnable Twenty CRM sample (separate repo): [`mycelar-example-twenty`](../mycelar-example-twenty) — Spring AI `ChatClient` + live Twenty REST. Not published as a module of this build.
+
 ## Requirements
 
 - Java 21

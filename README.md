@@ -77,3 +77,4 @@ Per-request routing context: `ChatClient` keys prefixed `mycelar.routing.`.
 | [Kernel](docs/kernel.md) | Graph, routing, capabilities, context |
 | [Spring AI](docs/spring-ai.md) | Advisor, tool cone, autoconfiguration |
 | [Embeddings](docs/embeddings.md) | Optional semantic matcher |
+| [Twenty sample](docs/example-twenty.md) | Separate CRM application |

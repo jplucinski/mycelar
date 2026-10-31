@@ -15,3 +15,4 @@ The Spring modules depend on the kernel, not on each other. With no embedding be
 | [Kernel](kernel.md) | Graph, paths, score, capabilities, capsules |
 | [Spring AI](spring-ai.md) | Advisor, tool bindings, autoconfiguration |
 | [Embeddings](embeddings.md) | Index, cosine score, failure policy |
+| [Twenty sample](example-twenty.md) | Separate CRM application |

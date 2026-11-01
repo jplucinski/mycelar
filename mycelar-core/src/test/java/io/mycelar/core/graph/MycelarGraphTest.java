@@ -1,13 +1,14 @@
 package io.mycelar.core.graph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import io.mycelar.core.capability.CapabilityDescriptor;
 import io.mycelar.core.capability.CapabilityId;
 import io.mycelar.core.capability.GatewayId;
+import io.mycelar.core.validation.GraphValidationException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class MycelarGraphTest {
@@ -130,5 +131,25 @@ class MycelarGraphTest {
 
         assertThat(graph.withWeights(Map.of()).capability(new CapabilityId("read")))
                 .contains(descriptor);
+    }
+
+    @Test
+    void withWeightsRejectsUnknownEdge() {
+        MycelarGraph graph = MycelarGraph.builder().node(node("crm", NodeType.DOMAIN)).build();
+        GraphValidationException ex =
+                catchThrowableOfType(
+                        GraphValidationException.class,
+                        () -> graph.withWeights(Map.of(new EdgeId("missing"), 0.5)));
+        assertThat(ex.violations())
+                .anyMatch(
+                        v ->
+                                v.path().equals("weights[missing]")
+                                        && v.message().equals("unknown EdgeId"));
+    }
+
+    @Test
+    void outgoingUnknownNodeIsEmpty() {
+        MycelarGraph graph = MycelarGraph.builder().node(node("crm", NodeType.DOMAIN)).build();
+        assertThat(graph.outgoing(new NodeId("missing"))).isEmpty();
     }
 }

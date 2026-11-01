@@ -145,6 +145,21 @@ class CapabilityResolverTest {
                                         new ConstraintId("must-confirm"))));
     }
 
+    @Test
+    void missingPathNodeIsSkipped() {
+        MycelarGraph graph = sampleGraph();
+        CapabilityScope scope =
+                resolver.resolve(
+                        graph,
+                        new RoutePath(
+                                List.of(new NodeId("missing"), new NodeId("leads")),
+                                List.of(new EdgeId("missing-edge"))),
+                        RoutingContext.empty(),
+                        List.of());
+        assertThat(scope.allowed()).containsExactly(new CapabilityId("search"));
+        assertThat(scope.blocked()).isEmpty();
+    }
+
     private static MycelarGraph sampleGraph() {
         return MycelarGraph.builder()
                 .node(domain("crm"))

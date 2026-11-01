@@ -134,4 +134,57 @@ class MycelarRuntimeTest {
         MycelarRuntime runtime = MycelarRuntime.builder().graph(graph).build();
         assertThat(runtime.graph()).isSameAs(graph);
     }
+
+    @Test
+    void customMatcherChangesWinner() {
+        GraphNode winner = labeled("winner");
+        GraphNode loser = labeled("loser");
+        MycelarGraph graph = MycelarGraph.builder().node(winner).node(loser).build();
+        SemanticMatcher matcher = (intent, node) -> node.id().value().equals("winner") ? 1.0 : 0.0;
+        RouteResult result =
+                MycelarRuntime.builder()
+                        .graph(graph)
+                        .semanticMatcher(matcher)
+                        .build()
+                        .route("anything", RoutingContext.empty());
+        assertThat(result.primary()).isPresent();
+        assertThat(result.primary().orElseThrow().path().nodeIds()).containsExactly(new NodeId("winner"));
+    }
+
+    @Test
+    void zeroDepthLimitStopsAtRoot() {
+        GraphNode root = labeled("root");
+        GraphNode child = labeled("child");
+        MycelarGraph graph =
+                MycelarGraph.builder()
+                        .node(root)
+                        .node(child)
+                        .edge(
+                                new GraphEdge(
+                                        new EdgeId("e"),
+                                        new NodeId("root"),
+                                        new NodeId("child"),
+                                        EdgeType.CONTAINS,
+                                        1.0,
+                                        new EdgeMetadata(Map.of())))
+                        .build();
+        RouteResult result =
+                MycelarRuntime.builder()
+                        .graph(graph)
+                        .routingLimits(new RoutingLimits(0, 1))
+                        .build()
+                        .route("root", RoutingContext.empty());
+        assertThat(result.candidates()).hasSize(1);
+        assertThat(result.candidates().getFirst().path().nodeIds()).containsExactly(new NodeId("root"));
+    }
+
+    private static GraphNode labeled(String id) {
+        return new GraphNode(
+                new NodeId(id),
+                NodeType.DOMAIN,
+                new NodeMetadata(id, "", List.of(), List.of(), Map.of()),
+                List.of(),
+                null,
+                null);
+    }
 }

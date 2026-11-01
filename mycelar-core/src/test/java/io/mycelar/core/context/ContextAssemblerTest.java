@@ -85,4 +85,27 @@ class ContextAssemblerTest {
                 .extracting(r -> r.capsule().id().value())
                 .containsExactly("c", "b", "a");
     }
+
+    @Test
+    void unknownPathNodeIsSkipped() {
+        ContextCapsule only =
+                new ContextCapsule(new CapsuleId("keep"), CapsuleType.INSTRUCTION, "keep", 1, 1.0, null);
+        GraphNode known =
+                new GraphNode(
+                        new NodeId("known"),
+                        NodeType.DOMAIN,
+                        new NodeMetadata("known", "", List.of(), List.of(), Map.of()),
+                        List.of(only),
+                        null,
+                        null);
+        MycelarGraph graph = MycelarGraph.builder().node(known).build();
+        ContextStack stack =
+                new ContextAssembler()
+                        .assemble(
+                                graph,
+                                new RoutePath(
+                                        List.of(new NodeId("missing"), new NodeId("known")),
+                                        List.of(new EdgeId("missing-edge"))));
+        assertThat(stack.capsules()).extracting(r -> r.capsule().id().value()).containsExactly("keep");
+    }
 }

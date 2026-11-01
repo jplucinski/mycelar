@@ -120,13 +120,80 @@ class EmbeddingSemanticMatcherTest {
         assertThat(model.calls()).isEqualTo(3);
     }
 
+    @Test
+    void nodeEmbedFailureIsNeutralForTheRestOfTheIntent() {
+        GraphNode node = Nodes.node("n", "n", "desc", List.of(), List.of());
+        MapEmbeddingModel model = new MapEmbeddingModel().put("q", 1f, 0f);
+        EmbeddingSemanticMatcher matcher = matcher(model, EmbeddingFailureMode.IGNORE_SIGNAL);
+        assertThat(matcher.similarity("q", node)).isEqualTo(0.5);
+        assertThat(matcher.similarity("q", node)).isEqualTo(0.5);
+        assertThat(model.calls()).isEqualTo(2);
+    }
+
+    @Test
+    void rawCosineIsKeptWhenNormalizationIsOff() {
+        GraphNode node = Nodes.node("n", "n", "desc", List.of(), List.of());
+        MapEmbeddingModel model =
+                new MapEmbeddingModel().put("q", 1f, 0f).put(encoder.encode(node), -1f, 0f);
+        EmbeddingSemanticMatcher matcher =
+                new EmbeddingSemanticMatcher(
+                        model,
+                        new InMemoryRoutingEmbeddingIndex(),
+                        encoder,
+                        fingerprint,
+                        similarity,
+                        false,
+                        EmbeddingFailureMode.IGNORE_SIGNAL);
+        assertThat(matcher.similarity("q", node)).isEqualTo(-1.0);
+    }
+
+    @Test
+    void changedIntentEmbedsANewQuery() {
+        GraphNode node = Nodes.node("n", "n", "desc", List.of(), List.of());
+        String encoded = encoder.encode(node);
+        MapEmbeddingModel model =
+                new MapEmbeddingModel().put("one", 1f, 0f).put("two", 0f, 1f).put(encoded, 1f, 0f);
+        EmbeddingSemanticMatcher matcher = matcher(model, EmbeddingFailureMode.IGNORE_SIGNAL);
+        matcher.similarity("one", node);
+        matcher.similarity("two", node);
+        assertThat(model.calls()).isEqualTo(3);
+    }
+
+    @Test
+    void normalizedScoreIsClamped() {
+        GraphNode node = Nodes.node("n", "n", "desc", List.of(), List.of());
+        MapEmbeddingModel high = new MapEmbeddingModel().put("q", 3f).put(encoder.encode(node), 3f);
+        EmbeddingSemanticMatcher highMatcher =
+                matcher(high, (left, right) -> left[0], EmbeddingFailureMode.IGNORE_SIGNAL);
+        assertThat(highMatcher.similarity("q", node)).isEqualTo(1.0);
+
+        MapEmbeddingModel low = new MapEmbeddingModel().put("q", -3f).put(encoder.encode(node), -3f);
+        EmbeddingSemanticMatcher lowMatcher =
+                matcher(low, (left, right) -> left[0], EmbeddingFailureMode.IGNORE_SIGNAL);
+        assertThat(lowMatcher.similarity("q", node)).isEqualTo(0.0);
+    }
+
+    @Test
+    void dimensionMismatchFromEmbedderIsNotSwallowed() {
+        MapEmbeddingModel model = new MapEmbeddingModel().failWith(new EmbeddingDimensionMismatchException("dim"));
+        EmbeddingSemanticMatcher matcher = matcher(model, EmbeddingFailureMode.IGNORE_SIGNAL);
+        GraphNode node = Nodes.node("n", "n", "desc", List.of(), List.of());
+        assertThatThrownBy(() -> matcher.similarity("q", node))
+                .isInstanceOf(EmbeddingDimensionMismatchException.class);
+    }
+
     private EmbeddingSemanticMatcher matcher(MapEmbeddingModel model, EmbeddingFailureMode mode) {
+        return matcher(model, similarity, mode);
+    }
+
+    private EmbeddingSemanticMatcher matcher(
+            MapEmbeddingModel model, VectorSimilarity vectorSimilarity, EmbeddingFailureMode mode) {
         return new EmbeddingSemanticMatcher(
                 model,
                 new InMemoryRoutingEmbeddingIndex(),
                 encoder,
                 fingerprint,
-                similarity,
+                vectorSimilarity,
                 true,
                 mode);
     }

@@ -27,8 +27,7 @@ public final class MycelarContextRenderer {
         StringBuilder sb = new StringBuilder();
         sb.append("<mycelar-context>\n");
         sb.append("Path: ");
-        sb.append(
-                candidate.path().nodeIds().stream().map(NodeId::value).collect(Collectors.joining(" / ")));
+        sb.append(candidate.path().nodeIds().stream().map(NodeId::value).collect(Collectors.joining(" / ")));
         sb.append('\n');
 
         List<ResolvedCapsule> capsules = candidate.contextStack().capsules();

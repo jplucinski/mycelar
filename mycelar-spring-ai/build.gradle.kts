@@ -13,6 +13,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.ai:spring-ai-autoconfigure-model-chat-client")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

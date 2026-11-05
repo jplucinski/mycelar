@@ -215,4 +215,25 @@ class CapabilityToolRegistryTest {
                                         dupRuntime, List.of(), List.of(), List.of(), Map.of()))
                 .isInstanceOf(MycelarConfigurationException.class);
     }
+
+    @Test
+    void nullWiringStillBindsByConvention() {
+        ToolCallback readLead = StubTools.callback("readLead");
+        ToolCallback updateLead = StubTools.callback("updateLead");
+        ToolCallback sendEmail = StubTools.callback("sendEmail");
+        CapabilityToolRegistry registry =
+                new CapabilityToolRegistry(
+                        runtime,
+                        null,
+                        null,
+                        List.of(
+                                () -> null,
+                                () -> new ToolCallback[] {readLead, updateLead, sendEmail}),
+                        null);
+
+        var resolved = registry.resolve(Set.of(new CapabilityId("read"), new CapabilityId("update")));
+        assertThat(resolved)
+                .extracting(b -> b.toolCallback().getToolDefinition().name())
+                .containsExactlyInAnyOrder("readLead", "updateLead");
+    }
 }

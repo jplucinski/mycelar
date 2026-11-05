@@ -13,7 +13,11 @@ public final class MycelarRequestMapper {
 
     public RouteRequest map(ChatClientRequest request, int topK) {
         Objects.requireNonNull(request, "request");
-        String intent = request.prompt().getUserMessage().getText();
+        return map(request, request.prompt().getUserMessage().getText(), topK);
+    }
+
+    public RouteRequest map(ChatClientRequest request, String intent, int topK) {
+        Objects.requireNonNull(request, "request");
         Map<String, Object> routing = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : request.context().entrySet()) {
             String key = entry.getKey();

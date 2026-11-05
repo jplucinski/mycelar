@@ -33,4 +33,19 @@ class MycelarRequestMapperTest {
         assertThat(mapped.context().get("chat_memory_conversation_id")).isEmpty();
         assertThat(mapped.context().get("other")).isEmpty();
     }
+
+    @Test
+    void mapUsesSuppliedIntent() {
+        ChatClientRequest request =
+                ChatClientRequest.builder()
+                        .prompt(new Prompt(new UserMessage("Update this lead")))
+                        .context(Map.of("mycelar.routing.confirmed", true))
+                        .build();
+
+        var mapped = new MycelarRequestMapper().map(request, "custom", 2);
+
+        assertThat(mapped.intent()).isEqualTo("custom");
+        assertThat(mapped.topK()).isEqualTo(2);
+        assertThat(mapped.context().get("confirmed")).contains(true);
+    }
 }

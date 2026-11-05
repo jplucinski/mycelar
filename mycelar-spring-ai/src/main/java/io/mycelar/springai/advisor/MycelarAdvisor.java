@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,8 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
     public static final String ROUTE_CONTEXT_KEY = "mycelar.route";
 
     private static final Logger log = LoggerFactory.getLogger(MycelarAdvisor.class);
+    private static final Pattern CONTEXT_BLOCK =
+            Pattern.compile("(?s)<mycelar-context>.*?</mycelar-context>\\s*");
 
     private final MycelarRuntime runtime;
     private final MycelarRequestMapper requestMapper;
@@ -97,8 +100,12 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
 
     ChatClientRequest apply(ChatClientRequest request) {
         Objects.requireNonNull(request, "request");
+        return route(request, request.prompt().getUserMessage().getText());
+    }
+
+    ChatClientRequest route(ChatClientRequest request, String intent) {
+        Objects.requireNonNull(request, "request");
         String sessionId = sessionResolver.resolve(request);
-        String intent = request.prompt().getUserMessage().getText();
         ChatClientRequest.Builder builder = request.mutate().context(MycelarSessionResolver.SESSION_ID_KEY, sessionId);
 
         if (intent == null || intent.isBlank()) {
@@ -106,7 +113,7 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
                     .build();
         }
 
-        RouteRequest routeRequest = requestMapper.map(request, properties.getTopK());
+        RouteRequest routeRequest = requestMapper.map(request, intent, properties.getTopK());
         Optional<RouteCandidate> primary = runtime.route(routeRequest).primary();
         if (primary.isEmpty()) {
             return builder.prompt(withTools(request.prompt(), List.of(), sessionId, "", Set.of(), List.of()))
@@ -127,14 +134,21 @@ public final class MycelarAdvisor implements CallAdvisor, StreamAdvisor {
         String block = renderer.render(candidate);
         Prompt withSystem =
                 prompt.augmentSystemMessage(
-                        systemMessage -> {
-                            String existing = systemMessage.getText();
-                            String next =
-                                    existing == null || existing.isBlank() ? block : existing + "\n\n" + block;
-                            return systemMessage.mutate().text(next).build();
-                        });
+                        systemMessage ->
+                                systemMessage.mutate().text(withBlock(systemMessage.getText(), block)).build());
         Prompt replaced = withTools(withSystem, guarded, sessionId, path, allowed, existingCallbacks(prompt));
         return builder.prompt(replaced).context(ROUTE_CONTEXT_KEY, candidate).build();
+    }
+
+    private static String withBlock(String existing, String block) {
+        if (existing == null || existing.isBlank()) {
+            return block;
+        }
+        String stripped = CONTEXT_BLOCK.matcher(existing).replaceAll("").stripTrailing();
+        if (stripped.isBlank()) {
+            return block;
+        }
+        return stripped + "\n\n" + block;
     }
 
     private Prompt withTools(

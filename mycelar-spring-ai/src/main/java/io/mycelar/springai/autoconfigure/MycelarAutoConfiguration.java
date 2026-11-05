@@ -7,6 +7,7 @@ import io.mycelar.core.routing.RouteScorer;
 import io.mycelar.core.routing.RoutingLimits;
 import io.mycelar.core.routing.SemanticMatcher;
 import io.mycelar.springai.advisor.MycelarAdvisor;
+import io.mycelar.springai.advisor.MycelarToolCallingAdvisor;
 import io.mycelar.springai.capability.CapabilityToolBindings;
 import io.mycelar.springai.capability.CapabilityToolRegistry;
 import io.mycelar.springai.context.MycelarContextRenderer;
@@ -18,6 +19,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientBuilderCustomizer;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
+import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -26,8 +29,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 
-@AutoConfiguration
+@AutoConfiguration(beforeName = "org.springframework.ai.model.chat.client.autoconfigure.ChatClientAutoConfiguration")
 @ConditionalOnClass(ChatClient.class)
 @ConditionalOnProperty(prefix = "mycelar.spring-ai", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(MycelarSpringAiProperties.class)
@@ -117,6 +121,22 @@ class MycelarAutoConfiguration {
                 authorizer,
                 sessionResolver,
                 properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ToolCallingAdvisor.Builder.class)
+    @ConditionalOnBean({MycelarAdvisor.class, ToolCallingManager.class})
+    ToolCallingAdvisor.Builder<?> mycelarToolCallingAdvisorBuilder(
+            MycelarAdvisor advisor, ToolCallingManager toolCallingManager, Environment environment) {
+        int order =
+                environment.getProperty(
+                        "spring.ai.chat.client.tool-calling.advisor-order",
+                        Integer.class,
+                        ToolCallingAdvisor.DEFAULT_ORDER);
+        return MycelarToolCallingAdvisor.builder()
+                .mycelarAdvisor(advisor)
+                .toolCallingManager(toolCallingManager)
+                .advisorOrder(order);
     }
 
     @Bean

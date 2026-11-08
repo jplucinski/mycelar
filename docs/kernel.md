@@ -124,7 +124,7 @@ The host looks up `CapabilityDescriptor` on the graph. `RouteResult` is not a to
 
 ## Context
 
-Capsules are taken from path nodes only. A capability can be in scope while the capsules on its own node are absent, because that node was not on the path.
+Capsules are taken from path nodes only. A capability can be in scope while the capsules on its own node are absent, because that node was not on the path. The assembled stack is what an adapter renders into the model prompt. `route()` returns the stack. It does not format a prompt.
 
 `ResolvedCapsule` copies the capsule, the source node, and the path index. TTL is copied and not expired. Core has no clock.
 

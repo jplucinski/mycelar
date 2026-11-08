@@ -1,6 +1,34 @@
 # Mycelar
 
-Graph-based context runtime for LLM applications.
+Graph-based context runtime for LLM applications. The model prompt is assembled after routing, from the chosen path in the graph and the capsules stored on that path.
+
+## What reaches the model
+
+The user message stays the user message. Mycelar does not send the graph. `MycelarAdvisor` routes the intent, then appends one system block built from the primary candidate. Tool callbacks on that request are replaced by the same candidate's capability cone.
+
+| Block section | Taken from |
+|---|---|
+| `Path` | Node ids of the chosen path |
+| `Context` | `ContextCapsule` text on those nodes, in assembler order |
+| `Available capabilities` | Capability ids the cone allowed |
+| `Blocked` | Capability id, constraint decision, constraint ids |
+
+```text
+<mycelar-context>
+Path: crm / leads / message
+
+Context:
+- Draft in the lead's language. Do not send.
+
+Available capabilities:
+- message.draft
+
+Blocked:
+- message.send: REQUIRE_CONFIRMATION (confirm-before-send)
+</mycelar-context>
+```
+
+Application system text is kept. A previous Mycelar block on that message is replaced. Capsule priority, type, and confidence stay in the kernel; the renderer copies the text. Node labels, descriptions, and keywords are used to score the path. Routing context (`mycelar.routing.*`) is read by the scorer and by constraint evaluators. It is not copied into the block.
 
 ## Modules
 

@@ -1,6 +1,6 @@
 # Spring AI
 
-`mycelar-spring-ai` turns one `RouteCandidate` into a system block, a tool list, and a `ToolContext` snapshot. Spring AI owns `ChatClient` and the model call. The kernel owns the graph.
+`mycelar-spring-ai` turns one `RouteCandidate` into a system block, a tool list, and a `ToolContext` snapshot. The block is the part of the model prompt Mycelar writes. It is rendered after routing, from the path, the capsules on that path, and the capability cone. Spring AI owns `ChatClient` and the model call. The kernel owns the graph.
 
 ```text
 ChatClient
@@ -31,7 +31,18 @@ Session id, in order: advisor context `mycelar.session.id`, then `ChatMemory` co
 
 ## Context block
 
-Capsule order is the kernel assembler's order. The renderer does not sort again and does not apply TTL.
+`MycelarContextRenderer` builds the block from the primary candidate only. Nothing in the block is a free-form prompt template.
+
+| Lines | Source on the candidate |
+|---|---|
+| `Path` | `path.nodeIds` |
+| `Context` | `contextStack` capsule texts, assembler order, one bullet each |
+| `Available capabilities` | `capabilityScope.allowed`, sorted by id |
+| `Blocked` | `capabilityScope.blocked`: id, decision, sorted constraint ids |
+
+Capsule order is the kernel assembler's order. The renderer does not sort again and does not apply TTL. It copies `ContextCapsule.text` and drops priority, type, confidence, and the source node. Empty sections are omitted. `include-capabilities-in-context` and `include-blocked-in-context` can drop those lists. No primary candidate means no block.
+
+The advisor appends the block to the system message with `augmentSystemMessage`. Existing application system text stays. A previous `<mycelar-context>` block on that message is stripped first, so a reroute replaces it.
 
 ```text
 <mycelar-context>
@@ -47,8 +58,6 @@ Blocked:
 - message.send: REQUIRE_CONFIRMATION (confirm-before-send)
 </mycelar-context>
 ```
-
-Empty sections are omitted. `include-capabilities-in-context` and `include-blocked-in-context` can drop those lists. No primary candidate means no block.
 
 ## Tool bindings
 

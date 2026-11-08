@@ -1,6 +1,6 @@
 # Mycelar
 
-Mycelar routes an intent over a typed application graph and hands the model only the context and tools that sit on the chosen path. The kernel does not call a model, store a graph, or run tools.
+Mycelar routes an intent over a typed application graph. The Spring adapter then builds the model prompt from that route: path node ids, capsule text stored on those nodes, and the capability cone. The kernel does not call a model, store a graph, or run tools.
 
 | Module | Role |
 |---|---|
